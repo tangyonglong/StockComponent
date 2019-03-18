@@ -4,4 +4,6 @@ cccccc
 1234567
 ddddddd
 update in dev
+e:stockcomponent in dev
+abcdefhijklmnopq
 d:stockcomponent in dev
