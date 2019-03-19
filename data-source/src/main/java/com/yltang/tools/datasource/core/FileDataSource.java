@@ -40,14 +40,14 @@ public abstract class FileDataSource<T> extends AbstractDataSource<T> {
 	}
 	
 	@Override
-	protected Object[][] readDatas(int startIndex, int endIndex) {
+	protected List<List<Object>> readDatas(int startIndex, int endIndex) {
 		if(fileInfos == null || fileInfos.size() <= 0){
 			return null;
 		}
 		
 		int currentTotal = 0;
 		boolean findStart = false;
-		List<Object[][]> cacheDatas = new ArrayList<Object[][]>();
+		List<List<Object>> cacheDatas = new ArrayList<List<Object>>();
 		for(FileInfo fileInfo:fileInfos){
 			currentTotal += fileInfo.getDataLine();
 			if(currentTotal < startIndex){
@@ -59,31 +59,31 @@ public abstract class FileDataSource<T> extends AbstractDataSource<T> {
 				int fstart =startIndex - currentTotal + fileInfo.getDataLine();
 				if(endIndex <= currentTotal){
 					int fend = endIndex - currentTotal + fileInfo.getDataLine();
-					Object[][] rds = readDatas(fileInfo.getFile(), fstart, fend);
-					cacheDatas.add(rds);
+					List<List<Object>> rds = readDatas(fileInfo.getFile(), fstart, fend);
+					cacheDatas.addAll(rds);
 					break;
 				}else{
-					Object[][] rds = readDatas(fileInfo.getFile(), fstart, fileInfo.getDataLine());
-					cacheDatas.add(rds);
+					List<List<Object>> rds = readDatas(fileInfo.getFile(), fstart, fileInfo.getDataLine());
+					cacheDatas.addAll(rds);
 					findStart = true;
 					continue;
 				}
 			}
 			
 			if(currentTotal < endIndex){
-				Object[][] rds = readDatas(fileInfo.getFile(), 1, fileInfo.getDataLine());
-				cacheDatas.add(rds);
+				List<List<Object>> rds = readDatas(fileInfo.getFile(), 1, fileInfo.getDataLine());
+				cacheDatas.addAll(rds);
 			}else{
 				int fend = endIndex - currentTotal + fileInfo.getDataLine();
-				Object[][] rds = readDatas(fileInfo.getFile(), 1, fend);
+				List<List<Object>> rds = readDatas(fileInfo.getFile(), 1, fend);
+				cacheDatas.addAll(rds);
 				break;
 			}
-			
 		}
-		
+		return cacheDatas;
 	};
 	
 	protected abstract List<FileInfo> initDataFiles(String filePath); 
 	
-	protected abstract Object[][] readDatas(File file, int startIndex, int endIndex);
+	protected abstract List<List<Object>> readDatas(File file, int startIndex, int endIndex);
 }

@@ -59,7 +59,7 @@ public abstract class  AbstractDataSource<T> implements DataSource<T>{
 		int endIndex = getEndIndex(page, size);
 		
 		//读取原始数据
-		Object[][] datas = readDatas(startIndex, endIndex);
+		List<List<Object>> datas = readDatas(startIndex, endIndex);
 		List<T> dataList = new ArrayList<T>();
 		//填充设置的数据类型列表
 		fillDataList(datas, dataList);
@@ -74,7 +74,7 @@ public abstract class  AbstractDataSource<T> implements DataSource<T>{
 	/**
 	 * 读取原始数据
 	 * */
-	protected abstract Object[][] readDatas(int startIndex, int endIndex);
+	protected abstract List<List<Object>> readDatas(int startIndex, int endIndex);
 	
 	/**
 	 * 设置标题字段映射
@@ -95,9 +95,9 @@ public abstract class  AbstractDataSource<T> implements DataSource<T>{
 	/**
 	 * 填充数据列表
 	 * */
-	private void fillDataList(Object[][] datas, List<T> dataList) throws IllegalAccessException, Exception{
-		if(datas != null && datas.length > 0){
-			for(Object[] row : datas){
+	private void fillDataList(List<List<Object>> datas, List<T> dataList) throws IllegalAccessException, Exception{
+		if(datas != null && datas.size() > 0){
+			for(List<Object> row : datas){
 				T result = fillData(row);
 				if(result != null){
 					dataList.add(result);
@@ -109,7 +109,7 @@ public abstract class  AbstractDataSource<T> implements DataSource<T>{
 	/**
 	 * 填充单个对象
 	 * */
-	private T fillData(Object[] data) throws Exception, IllegalAccessException{
+	private T fillData(List<Object> data) throws Exception, IllegalAccessException{
 		@SuppressWarnings("unchecked")
 		T entity = (T)cls.newInstance();
 		setObj(entity, data);
@@ -120,12 +120,12 @@ public abstract class  AbstractDataSource<T> implements DataSource<T>{
 	/**
 	 * 设置单个对象
 	 * */
-	private void setObj(T obj,Object[] data) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
+	private void setObj(T obj,List<Object> data) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
 		for(Map.Entry<String, FieldMapper> enty:fieldMapping.entrySet()){
 			FieldMapper fieldMapgger = enty.getValue();
 			int index =  fieldMapgger.getIndex();
 			if(index != -1){
-				Object ov = fieldMapgger.getFieldType().parse(data[index]);
+				Object ov = fieldMapgger.getFieldType().parse(data.get(index));
 				setValue(obj, enty.getValue().getFieldName(),ov);
 			}
 		}

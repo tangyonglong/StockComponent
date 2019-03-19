@@ -130,26 +130,25 @@ public final class FileUtils {
         return list;
     }
     
-	 public static List<String[]> csv(InputStream in, int startIndex, int endIndex) {
-	        List<String[]> csvList = new ArrayList<String[]>();
-	        if (null != in) {
-	            CsvReader reader = new CsvReader(in, ',', Charset.forName("GBK"));
-	            try {
-	                // 遍历每一行，若有#注释部分，则不处理，若没有，则加入csvList
-	                while (reader.readRecord()) {
-	                    if (!reader.getValues()[0].contains("#"))// 清除注释部分
-	                    {
-	                        csvList.add(reader.getValues());
-	                    }
-	                }
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	            }
-
-	            reader.close();
-	        }
-	        return csvList;
-	    }
+	public static List<String[]> csv(InputStream in, int startIndex, int endIndex) {
+		List<String[]> csvList = new ArrayList<String[]>();
+		if (null != in) {
+			CsvReader reader = new CsvReader(in, ',', Charset.forName("GBK"));
+			try {
+				// 遍历每一行，若有#注释部分，则不处理，若没有，则加入csvList
+				while (reader.readRecord()) {
+					// 清除注释部分
+					if (!reader.getValues()[0].contains("#")){
+						csvList.add(reader.getValues());
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			reader.close();
+		}
+		return csvList;
+	}
     
     public static void main(String[] args) {
     	File file = new File("C:\\Users\\yltang\\Downloads\\abc.xlsx");
