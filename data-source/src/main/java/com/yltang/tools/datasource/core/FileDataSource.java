@@ -83,6 +83,21 @@ public abstract class FileDataSource<T> extends AbstractDataSource<T> {
 		return cacheDatas;
 	};
 	
+	protected boolean isFitFile(String fileName, List<String> fileTypes){
+		if(StringUtils.isEmpty(fileName)
+		|| fileTypes == null
+		|| fileTypes.size() <= 0){
+			return false;
+		}
+		
+		for(String ft : fileTypes){
+			if(fileName.endsWith("." + ft)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	protected abstract List<FileInfo> initDataFiles(String filePath); 
 	
 	protected abstract List<List<Object>> readDatas(File file, int startIndex, int endIndex);

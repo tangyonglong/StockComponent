@@ -5,9 +5,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -123,11 +127,50 @@ public final class FileUtils {
     private static List<Object> readRow(Row row){
     	ArrayList<Object> list = new ArrayList<Object>();
         for (Cell cell : row) {
-            //根据不同类型转化成字符串
-            cell.setCellType(Cell.CELL_TYPE_STRING);
-            list.add(cell.getStringCellValue());
+            list.add(castCell(cell));
         }
         return list;
+    }
+    
+    @SuppressWarnings("deprecation")
+	private static Object castCell(Cell cell){
+    	String value;
+    	switch(cell.getCellType()){
+    		case HSSFCell.CELL_TYPE_NUMERIC: // 数字
+    			//如果为时间格式的内容
+    			if (HSSFDateUtil.isCellDateFormatted(cell)) {      
+    				//注：format格式 yyyy-MM-dd hh:mm:ss 中小时为12小时制，若要24小时制，则把小h变为H即可，yyyy-MM-dd HH:mm:ss
+    				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");  
+    				value=sdf.format(HSSFDateUtil.getJavaDate(cell.
+    				getNumericCellValue())).toString();                                 
+    				break;
+    			}else {
+    				value = String.valueOf(cell.getNumericCellValue());
+    				if(value.endsWith(".0") || value.endsWith("E10")){
+    					value = new DecimalFormat("0").format(cell.getNumericCellValue());
+    				}
+    			}
+    			break;
+    		case HSSFCell.CELL_TYPE_STRING: // 字符串
+    			value = cell.getStringCellValue();
+    			break;
+    		case HSSFCell.CELL_TYPE_BOOLEAN: // Boolean
+    			value = cell.getBooleanCellValue() + "";
+    			break;
+    		case HSSFCell.CELL_TYPE_FORMULA: // 公式
+    			value = cell.getCellFormula() + "";
+    			break;
+    		case HSSFCell.CELL_TYPE_BLANK: // 空值
+    			value = "";
+    			break;
+    		case HSSFCell.CELL_TYPE_ERROR: // 故障
+    			value = "非法字符";
+    			break;
+    		default:
+    			value = "未知类型";
+    			break;
+    	}
+    	return value;
     }
     
 	public static List<String[]> csv(InputStream in, int startIndex, int endIndex) {
